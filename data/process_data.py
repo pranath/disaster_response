@@ -7,7 +7,16 @@ import os
 
 
 def load_data(messages_filepath, categories_filepath):
+    """
+    Description: Loads csv files of messages and categories into a merged pandas dataframe
 
+    Args:
+        - messages_filepath: Name & path of csv file of message data
+        - categories_filepath: Name & path of csv file of categories data
+
+    Returns:
+        - df: Dataframe of merged messages & categories
+    """
     # Load messages
     messages = pd.read_csv(messages_filepath)
     # Load categories
@@ -18,6 +27,15 @@ def load_data(messages_filepath, categories_filepath):
 
 
 def clean_data(df):
+    """
+    Description: Cleans data in dataframe & transforms category fields
+
+    Args:
+        - df: Dataframe of messages and categories
+
+    Returns:
+        - df: Cleaned dataframe
+    """
 
     # Split categories into separate columns
     categories = df['categories'].str.split(pat=';', expand=True)
@@ -47,6 +65,17 @@ def clean_data(df):
     return df
 
 def save_data(df, database_filename):
+    """
+    Description: Save the current data to an sqlite database file on disk
+
+    Args:
+        - df: Dataframe of message data
+        - database_filename: Filename to save data to
+
+    Returns:
+        Nothing
+    """
+
     # Delete previous db
     os.remove(database_filename)
     # Save current version of database
