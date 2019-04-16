@@ -17,6 +17,16 @@ from sqlalchemy import create_engine
 class StartingVerbExtractor(BaseEstimator, TransformerMixin):
 
     def starting_verb(self, text):
+        """
+        Description: Boolean function returns true if string contains first word as a kind of verb, false otherwise.
+
+        Args:
+            - text: text string
+
+        Returns:
+            - Boolean
+        """
+
         sentence_list = nltk.sent_tokenize(text)
         for sentence in sentence_list:
             pos_tags = nltk.pos_tag(tokenize(sentence))
@@ -31,6 +41,16 @@ class StartingVerbExtractor(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X):
+        """
+        Description: Applies starting verb function to X and returns boolean dataframe
+
+        Args:
+            - X: Dataframe
+
+        Returns:
+            - Dataframe of boolean values
+        """
+
         X_tagged = pd.Series(X).apply(self.starting_verb)
         return pd.DataFrame(X_tagged)
 
@@ -39,6 +59,16 @@ class StartingVerbExtractor(BaseEstimator, TransformerMixin):
 app = Flask(__name__)
 
 def tokenize(text):
+    """
+    Description: Takes a string, tokenises, lemmatises & strips white space to return a list of cleaned tokens
+
+    Args:
+        - text: Text string
+
+    Returns:
+        - clean_tokens: tokenised version fo string
+    """
+    
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
 
@@ -61,21 +91,21 @@ model = joblib.load("../models/classifier.pkl")
 @app.route('/')
 @app.route('/index')
 def index():
-    
+
     # Extract data for genre counts
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
-    
+
     # Extract data for category counts
     categories_df = df.drop(["id", "message", "original", "genre"], axis=1)
     category_names = list(categories_df.columns.values)
     category_totals = categories_df.apply(pd.Series.value_counts)
     category_totals = category_totals.iloc[1]
-    
-    # Extract data for heatmap 
+
+    # Extract data for heatmap
     coocc_matrix = categories_df.T.dot(categories_df)
     coocc_matrix = coocc_matrix.values
-    
+
     # create visuals
     graphs = [
         {
@@ -134,11 +164,11 @@ def index():
             }
         }
     ]
-    
+
     # encode plotly graphs in JSON
     ids = ["graph-{}".format(i) for i, _ in enumerate(graphs)]
     graphJSON = json.dumps(graphs, cls=plotly.utils.PlotlyJSONEncoder)
-    
+
     # render web page with plotly graphs
     return render_template('master.html', ids=ids, graphJSON=graphJSON)
 
@@ -147,13 +177,13 @@ def index():
 @app.route('/go')
 def go():
     # save user input in query
-    query = request.args.get('query', '') 
+    query = request.args.get('query', '')
 
     # use model to predict classification for query
     classification_labels = model.predict([query])[0]
     classification_results = dict(zip(df.columns[4:], classification_labels))
 
-    # This will render the go.html Please see that file. 
+    # This will render the go.html Please see that file.
     return render_template(
         'go.html',
         query=query,
