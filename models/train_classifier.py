@@ -28,6 +28,16 @@ from sklearn.externals import joblib
 class StartingVerbExtractor(BaseEstimator, TransformerMixin):
 
     def starting_verb(self, text):
+        """
+        Description: Boolean function returns true if string contains first word as a kind of verb, false otherwise.
+
+        Args:
+            - text: text string
+
+        Returns:
+            - Boolean
+        """
+
         sentence_list = nltk.sent_tokenize(text)
         for sentence in sentence_list:
             pos_tags = nltk.pos_tag(tokenize(sentence))
@@ -42,10 +52,29 @@ class StartingVerbExtractor(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X):
+        """
+        Description: Applies starting verb function to X and returns boolean dataframe
+
+        Args:
+            - X: Dataframe
+
+        Returns:
+            - Dataframe of boolean values
+        """
+
         X_tagged = pd.Series(X).apply(self.starting_verb)
         return pd.DataFrame(X_tagged)
 
 def load_data(database_filepath):
+    """
+    Description: Loads data from sqlite database file
+
+    Args:
+        - database_filepath: Filename & path to database file
+
+    Returns:
+        - Predictor features X dataframe, Target classes dataframe Y, target class names list target_names
+    """
 
     # Load the db
     engine = create_engine('sqlite:///' + str(database_filepath))
@@ -58,6 +87,15 @@ def load_data(database_filepath):
 
 
 def tokenize(text):
+    """
+    Description: Takes a string, tokenises, lemmatises & strips white space to return a list of cleaned tokens
+
+    Args:
+        - text: Text string
+
+    Returns:
+        - clean_tokens: tokenised version fo string
+    """
 
     # Remove punctuation characters
     text = re.sub(r"[^a-zA-Z0-9]", " ", text)
@@ -76,6 +114,15 @@ def tokenize(text):
 
 
 def build_model():
+    """
+    Description: Creates a ML model
+
+    Args:
+        None
+
+    Returns:
+        - Model built with pipeline, specific parameters & grid search
+    """
 
     # Define pipeline
     pipeline = Pipeline([
@@ -114,6 +161,17 @@ def build_model():
 
 
 def performance_report(actual, predicted, target_names):
+    """
+    Description: Takes predicted & actual class values & calculates a range of performance metrics
+
+    Args:
+        - actual: Actual target class values for data
+        - predicted: Predicted target class values for data
+        - target_names: List of names of target classes
+
+    Returns:
+        - Dataframe of metrics
+    """
 
     # Init list for metrics
     metrics = []
@@ -143,6 +201,18 @@ def performance_report(actual, predicted, target_names):
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    """
+    Description: Take a trained model, predict on test data and print performance report
+
+    Args:
+        - model: The ML model
+        - X_test: Dataframe of test features
+        - Y_test: Dataframe of test classes
+        - category_names: List of names of test classes
+
+    Returns:
+        Nothing
+    """
 
     # predict on test data
     Y_pred = model.predict(X_test)
@@ -155,6 +225,16 @@ def evaluate_model(model, X_test, Y_test, category_names):
     print("\nBest Parameters:", model.best_params_)
 
 def save_model(model, model_filepath):
+    """
+    Description: Same ML model to file
+
+    Args:
+        - model: The ML model
+        - model_filepath: Path and name to file to store trained ML model
+
+    Returns:
+        Nothing
+    """
 
     # save the model to disk
     joblib.dump(model, model_filepath)
