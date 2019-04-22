@@ -6,6 +6,7 @@ nltk.download(['punkt', 'wordnet', 'averaged_perceptron_tagger'])
 
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
+from utils import tokenize, StartingVerbExtractor
 
 from flask import Flask
 from flask import render_template, request, jsonify
@@ -14,83 +15,27 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.externals import joblib
 from sqlalchemy import create_engine
 
-class StartingVerbExtractor(BaseEstimator, TransformerMixin):
-
-    def starting_verb(self, text):
-        """
-        Description: Boolean function returns true if string contains first word as a kind of verb, false otherwise.
-
-        Args:
-            - text: text string
-
-        Returns:
-            - Boolean
-        """
-
-        sentence_list = nltk.sent_tokenize(text)
-        for sentence in sentence_list:
-            pos_tags = nltk.pos_tag(tokenize(sentence))
-            if pos_tags:
-                first_word, first_tag = pos_tags[0]
-                if first_tag in ['VB', 'VBP'] or first_word == 'RT':
-                    return True
-                return False
-        return False
-
-    def fit(self, X, y=None):
-        return self
-
-    def transform(self, X):
-        """
-        Description: Applies starting verb function to X and returns boolean dataframe
-
-        Args:
-            - X: Dataframe
-
-        Returns:
-            - Dataframe of boolean values
-        """
-
-        X_tagged = pd.Series(X).apply(self.starting_verb)
-        return pd.DataFrame(X_tagged)
-
-
-
 app = Flask(__name__)
 
-def tokenize(text):
-    """
-    Description: Takes a string, tokenises, lemmatises & strips white space to return a list of cleaned tokens
-
-    Args:
-        - text: Text string
-
-    Returns:
-        - clean_tokens: tokenised version fo string
-    """
-    
-    tokens = word_tokenize(text)
-    lemmatizer = WordNetLemmatizer()
-
-    clean_tokens = []
-    for tok in tokens:
-        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
-        clean_tokens.append(clean_tok)
-
-    return clean_tokens
-
 # load data
-engine = create_engine('sqlite:///../data/DisasterResponse.db')
-df = pd.read_sql_table('DisasterResponse', engine)
+#engine = create_engine('sqlite:///../data/DisasterResponse.db')
+#engine = create_engine('sqlite:///DisasterResponse.db')
+engine = create_engine('sqlite:///DisasterResponseOpt.db')
+df = pd.read_sql_table('DisasterResponseOpt', engine)
 
 # load model
-model = joblib.load("../models/classifier.pkl")
+#model = joblib.load("../models/classifier.pkl")
+model = joblib.load("classifier.pkl")
 
 
 # index webpage displays cool visuals and receives user input text for model
 @app.route('/')
 @app.route('/index')
 def index():
+
+    # Extract 10 random message examples
+    random_10_df = df.sample(n=5)
+    random_10_messages = random_10_df['message'].tolist()
 
     # Extract data for genre counts
     genre_counts = df.groupby('genre').count()['message']
@@ -111,24 +56,6 @@ def index():
         {
             'data': [
                 Bar(
-                    x=genre_names,
-                    y=genre_counts
-                )
-            ],
-
-            'layout': {
-                'title': 'Distribution of Message Genres',
-                'yaxis': {
-                    'title': "Count"
-                },
-                'xaxis': {
-                    'title': "Genre"
-                }
-            }
-        },
-        {
-            'data': [
-                Bar(
                     x=category_names,
                     y=category_totals
                 )
@@ -136,12 +63,12 @@ def index():
 
             'layout': {
                 'title': 'Message category usage counts',
-                'yaxis': {
-                    'title': "Count"
-                },
-                'xaxis': {
-                    'title': "Category name"
-                }
+                #'yaxis': {
+                #    'title': "Count"
+                #},
+                #'xaxis': {
+                #    'title': "Category name"
+                #}
             }
         },
         {
@@ -155,12 +82,12 @@ def index():
 
             'layout': {
                 'title': 'Message category co-occurance heatmap',
-                'yaxis': {
-                    'title': "Category name"
-                },
-                'xaxis': {
-                    'title': "Category name"
-                }
+                #'yaxis': {
+                #    'title': "Category name"
+                #},
+                #'xaxis': {
+                #    'title': "Category name"
+                #}
             }
         }
     ]
@@ -170,7 +97,7 @@ def index():
     graphJSON = json.dumps(graphs, cls=plotly.utils.PlotlyJSONEncoder)
 
     # render web page with plotly graphs
-    return render_template('master.html', ids=ids, graphJSON=graphJSON)
+    return render_template('master.html', ids=ids, graphJSON=graphJSON, messages=random_10_messages)
 
 
 # web page that handles user query and displays model results
@@ -192,7 +119,8 @@ def go():
 
 
 def main():
-    app.run(host='0.0.0.0', port=3001, debug=True)
+    #app.run(host='0.0.0.0', port=3001, debug=True)
+    print('hi')
 
 
 if __name__ == '__main__':
