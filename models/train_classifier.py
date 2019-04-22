@@ -8,6 +8,7 @@ import pandas as pd
 import datetime
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
+from utils import tokenize, StartingVerbExtractor
 
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.metrics import classification_report
@@ -25,45 +26,6 @@ from sqlalchemy import create_engine
 import pickle
 from sklearn.externals import joblib
 
-class StartingVerbExtractor(BaseEstimator, TransformerMixin):
-
-    def starting_verb(self, text):
-        """
-        Description: Boolean function returns true if string contains first word as a kind of verb, false otherwise.
-
-        Args:
-            - text: text string
-
-        Returns:
-            - Boolean
-        """
-
-        sentence_list = nltk.sent_tokenize(text)
-        for sentence in sentence_list:
-            pos_tags = nltk.pos_tag(tokenize(sentence))
-            if pos_tags:
-                first_word, first_tag = pos_tags[0]
-                if first_tag in ['VB', 'VBP'] or first_word == 'RT':
-                    return True
-                return False
-        return False
-
-    def fit(self, X, y=None):
-        return self
-
-    def transform(self, X):
-        """
-        Description: Applies starting verb function to X and returns boolean dataframe
-
-        Args:
-            - X: Dataframe
-
-        Returns:
-            - Dataframe of boolean values
-        """
-
-        X_tagged = pd.Series(X).apply(self.starting_verb)
-        return pd.DataFrame(X_tagged)
 
 def load_data(database_filepath):
     """
@@ -78,39 +40,12 @@ def load_data(database_filepath):
 
     # Load the db
     engine = create_engine('sqlite:///' + str(database_filepath))
-    df = pd.read_sql_table('DisasterResponse', engine)
-    target_names = ['related', 'request', 'offer', 'aid_related', 'medical_help', 'medical_products', 'search_and_rescue', 'security', 'military', 'water', 'food', 'shelter', 'clothing', 'money', 'missing_people', 'refugees', 'death', 'other_aid', 'infrastructure_related', 'transport', 'buildings', 'electricity', 'tools', 'hospitals', 'shops', 'aid_centers', 'other_infrastructure', 'weather_related', 'floods', 'storm', 'fire', 'earthquake', 'cold', 'other_weather', 'direct_report']
+    df = pd.read_sql_table('DisasterResponseOpt', engine)
+    target_names = ['aid_related', 'water', 'food', 'shelter', 'clothing', 'death', 'weather_related', 'floods', 'storm', 'earthquake', 'cold', 'request', 'direct_report']
     X = df['message']
     Y = df[target_names]
     # Return processed values
     return X, Y, target_names
-
-
-def tokenize(text):
-    """
-    Description: Takes a string, tokenises, lemmatises & strips white space to return a list of cleaned tokens
-
-    Args:
-        - text: Text string
-
-    Returns:
-        - clean_tokens: tokenised version fo string
-    """
-
-    # Remove punctuation characters
-    text = re.sub(r"[^a-zA-Z0-9]", " ", text)
-    # Tokenise
-    tokens = word_tokenize(text)
-    # Create lemmatiser
-    lemmatizer = WordNetLemmatizer()
-
-    clean_tokens = []
-    # Lemmatize, standardise (lower case) & clean tokens
-    for tok in tokens:
-        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
-        clean_tokens.append(clean_tok)
-
-    return clean_tokens
 
 
 def build_model():
@@ -125,25 +60,34 @@ def build_model():
     """
 
     # Define pipeline
+    #pipeline = Pipeline([
+    #    ('features', FeatureUnion([
+    #        ('text_pipeline', Pipeline([
+    #            ('vect', CountVectorizer(tokenizer=tokenize)),
+    #            ('tfidf', TfidfTransformer())
+    #        ])),
+    #        ('starting_verb', StartingVerbExtractor())
+    #    ])),
+    #    ('clf', MultiOutputClassifier(GradientBoostingClassifier()))
+    #])
     pipeline = Pipeline([
-        ('features', FeatureUnion([
-
-            ('text_pipeline', Pipeline([
-                ('vect', CountVectorizer(tokenizer=tokenize)),
-                ('tfidf', TfidfTransformer())
-            ])),
-
-            ('starting_verb', StartingVerbExtractor())
-        ])),
-
-        ('clf', MultiOutputClassifier(GradientBoostingClassifier()))
+        ('vect', CountVectorizer(tokenizer=tokenize)),
+        ('tfidf', TfidfTransformer()),
+        ('clf', MultiOutputClassifier(GradientBoostingClassifier(random_state=1)))
     ])
     # Define params for grid search
     parameters = {
-        #'features__text_pipeline__vect__ngram_range': ((1, 1), (1, 2)),
+        'vect__ngram_range': ((1, 1), (1, 2)),
+        'vect__max_df': (0.5, 0.75, 1.0),
+        'vect__max_features': (None, 5000, 10000),
+        'clf__n_estimators': [50, 100, 200, 400],
+        'clf__min_samples_split': [2, 3, 4],
+        'clf__subsample': [0.2, 0.5, 1.0],
+        'clf__max_depth': [2, 3, 5],
+        #'features__text_pipeline_vect__ngram_range': ((1, 1), (1, 2)),
         #'features__text_pipeline__vect__max_df': (0.5, 0.75, 1.0),
         #'features__text_pipeline__vect__max_features': (None, 5000, 10000),
-        'features__text_pipeline__tfidf__use_idf': (True, False),
+        #'features__text_pipeline__tfidf__use_idf': (True, False),
         #'clf__n_estimators': [50, 100, 200, 400],
         #'clf__min_samples_split': [2, 3, 4],
         #'clf__subsample': [0.2, 0.5, 1.0],
