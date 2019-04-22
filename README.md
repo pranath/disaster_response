@@ -8,9 +8,7 @@ In this project I will analyze disaster messages to build a machine learning mod
     - To run ETL pipeline that cleans data and stores in database 'python data/process_data.py data/disaster_messages.csv data/disaster_categories.csv data/DisasterResponse.db'
     - To run ML pipeline that trains classifier and saves a classifier 'python models/train_classifier.py data/DisasterResponse.db models/classifier.pkl'
 
-2. Run the following command in the app directory to run the web app 'python run.py'
-
-3. Go to http://0.0.0.0:3001/
+2. The app folder contains a web app ready to deploy to the Heroku platform, see an example here: https://disaster-response-pranath.herokuapp.com
 
 ## Important Files
 
