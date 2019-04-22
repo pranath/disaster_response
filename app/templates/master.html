@@ -12,6 +12,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        button {
+            margin-bottom: 6px;
+        }
+    </style>
 </head>
 
 <body>
@@ -22,10 +27,10 @@
     <div class="collapse navbar-collapse" id="navbarCollapse">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item">
-          <a class="nav-link" href="https://www.udacity.com/" target="_blank">Made with Udacity</a>
+          <a class="nav-link" href="https://github.com/pranath/disaster_response" target="_blank">Github repo</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="https://github.com/pranath" target="_blank">Contact</a>
+          <a class="nav-link" href="https://www.linkedin.com/in/pranath-fernando-54260ab3/" target="_blank">Contact</a>
         </li>
       </ul>
     </div>
@@ -39,7 +44,7 @@
       	<br />
         <h1 class="text-center">Disaster Response Project</h1>
         <p class="text-center">Analyzing message data for disaster response</p>
-      
+
         <div class="row">
             <div class="col-lg-12 form-group-lg">
                 <form action="/go" method="get">
@@ -60,9 +65,18 @@
 <div class="container">
     {% block content %}
         <div class="page-header">
-            <h1 class="text-center">Overview of Training Dataset</h1>
+            <h1 class="text-center">Overview of Message Dataset</h1>
         </div>
+        <br />
+        <h5 class="text-center">Example messages</h5>
+        <br />
     {% endblock %}
+    {% for message in messages %}
+    <blockquote class="blockquote">
+      <p class="mb-0 font-italic">"{{ message }}"</p>
+    </blockquote>
+    {% endfor %}
+
 
     {% for id in ids %}
         <div id="{{id}}"></div>

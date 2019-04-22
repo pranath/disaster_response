@@ -10,16 +10,13 @@
 {% block content %}
     <h4 class="text-center">Message Categories:</h4>
 	<br />
-        <div class="card-columns">
             {% for category, classification in classification_result.items() %}
                 {% if classification == 1 %}
-          			<div class="card text-white bg-info mb-3">
-                      <div class="card-header">{{category.replace('_', ' ').title()}}</div>
-          			</div>
+                    <button type="button" class="btn btn-primary">{{category.replace('_', ' ').title()}}</button>
                 {% else %}
+                    <button type="button" class="btn btn-outline-primary">{{category.replace('_', ' ').title()}}</button>
                 {% endif %}
             {% endfor %}
-          </div>
         </div>
     </div>
 
