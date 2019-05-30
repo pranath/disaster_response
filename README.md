@@ -18,6 +18,15 @@ In this project I will analyze disaster messages to build a machine learning mod
 - app/run.py: Start the Python server for the web app and prepare visualizations.
 - notebooks/*: Juypter notebooks used to develop ETL, NLP & ML pipelines
 
+## Presentations
+This work was presented at the Data Science meetup 'Brighton Data Forum' on 29th May 2019
+
+https://www.meetup.com/Brighton-Data-Forum/events/mgggbqyzhbfc/
+
+The presentation slides for this can be found here:
+
+https://docs.google.com/presentation/d/164oDiuEZFR35X9QEJN1R-rOb4sp5r32DxR4Xm6z-Qgs/edit#slide=id.p
+
 ## Screenshots
 
 ### Home page - stats view 1
