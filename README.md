@@ -18,6 +18,11 @@ In this project I will analyze disaster messages to build a machine learning mod
 - app/run.py: Start the Python server for the web app and prepare visualizations.
 - notebooks/*: Juypter notebooks used to develop ETL, NLP & ML pipelines
 
+## Results
+
+1. In the __[first project](https://github.com/pranath/disaster_response/blob/master/notebooks/MLPipelinePreparation.ipynb)__ finished in April 2019, the best result was an overall F1 score on all categories of 0.41
+2. In the __[latest project](https://github.com/pranath/disaster_response/blob/master/notebooks/MLPipelinePreparation2.ipynb)__ finished in December 2019, the best result was an overall F1 score on all categories of 0.75
+
 ## Presentations
 This work was presented at the Data Science meetup 'Brighton Data Forum' on 29th May 2019
 
